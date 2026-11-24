@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101412">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https:; media-src https: blob:; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <title>Wavebox Free</title>
+  <style id="setup-style">
+    *{box-sizing:border-box}body{margin:0;background:#101412;color:#f1f5f1;font:16px system-ui,sans-serif}
+    main{max-width:33rem;margin:auto;padding:calc(36px + env(safe-area-inset-top)) 22px 32px}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:24px}header img{border-radius:14px}
+    h1{margin:0;font-size:1.8rem;letter-spacing:-.04em}p{color:#b6c3b9;line-height:1.55}
+    section{background:#1b251e;border:1px solid #2e3b32;border-radius:19px;padding:18px}
+    h2{font-size:1.15rem;margin:0}section p:last-child{margin-bottom:0}
+    textarea,button{display:block;width:100%;font:inherit;margin-top:10px;border-radius:12px;padding:12px}
+    textarea{color:#f1f5f1;border:1px solid #506153;background:#101412;resize:vertical;overflow-wrap:anywhere}
+    button{border:0;background:#c5ff74;color:#12210d;font-weight:700;cursor:pointer}
+    button.secondary{color:#f1f5f1;background:#29312e}button:disabled{opacity:.55}
+    textarea:focus,button:focus-visible{outline:2px solid #c5ff74;outline-offset:2px}
+    [hidden]{display:none!important}
+  </style>
+  <script type="module" src="./setup.js"></script>
+</head>
+<body>
+  <main>
+    <header><img src="./icon-192.png" alt="" width="48" height="48"><h1>Wavebox Free</h1></header>
+    <section id="installation">
+      <h2>Установка на iPhone</h2>
+      <p>Открой эту страницу в Safari. Нажми «Поделиться» → «На экран „Домой“», затем запусти Wavebox с иконки.</p>
+    </section>
+    <section id="pairing" hidden>
+      <h2>Активация</h2>
+      <button id="create-key" type="button">Получить код привязки</button>
+      <div id="pairing-code" hidden>
+        <p>Отправь этот код в чат, где попросил опубликовать Wavebox. После активации снова открой приложение с иконки.</p>
+        <textarea id="public-key" aria-label="Код привязки" rows="3" readonly></textarea>
+        <button id="copy" type="button">Скопировать код</button>
+        <button id="retry" type="button" class="secondary">Проверить активацию</button>
+      </div>
+      <p id="status" role="status"></p>
+    </section>
+    <noscript>Для активации Wavebox нужен JavaScript.</noscript>
+  </main>
+</body>
+</html>
