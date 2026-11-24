@@ -8,6 +8,7 @@ const codePanel = document.getElementById('pairing-code');
 const retry = document.getElementById('retry');
 const status = document.getElementById('status');
 const releaseUrl = new URL('./release.json', import.meta.url);
+const revisionUrl = new URL('./revision.json', import.meta.url);
 const releaseCache = 'wavebox-iphone-release-v1';
 
 function openDatabase() {
@@ -36,16 +37,44 @@ function saveKey(database, keyPair) {
   });
 }
 
-async function retrieveRelease() {
-  const onlineUrl = new URL(releaseUrl);
-  onlineUrl.searchParams.set('t', String(Date.now()));
+async function timedFetch(url, wait) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), wait);
   try {
-    const response = await fetch(onlineUrl, { cache: 'no-store' });
-    if (response.ok) return response;
-  } catch {
-    // Use the encrypted copy kept during a previous successful launch.
+    return await fetch(url, { cache: 'no-store', signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
   }
-  return caches.match(releaseUrl, { cacheName: releaseCache });
+}
+
+async function retrieveRelease() {
+  const cache = await caches.open(releaseCache).catch(() => null);
+  const cached = await cache?.match(releaseUrl).catch(() => null);
+  const fallback = cached ? { response: cached, cache, fromCache: true } : null;
+  if (fallback && !navigator.onLine) return fallback;
+
+  try {
+    const probe = new URL(revisionUrl);
+    probe.searchParams.set('t', String(Date.now()));
+    const revisionResponse = await timedFetch(probe, 4500);
+    const revision = revisionResponse.ok ? await revisionResponse.json() : null;
+    const digest = /^[\w-]{43}$/.test(revision?.sha256) ? revision.sha256 : null;
+    const previousRevision = await cache?.match(revisionUrl);
+    if (fallback && (!digest || digest === (await previousRevision?.json())?.sha256)) return fallback;
+
+    const onlineUrl = new URL(releaseUrl);
+    onlineUrl.searchParams.set('v', digest || String(Date.now()));
+    const response = await timedFetch(onlineUrl, 12000);
+    if (!response.ok) return fallback;
+    if (digest) {
+      const contents = await response.clone().arrayBuffer();
+      const actual = encode(new Uint8Array(await crypto.subtle.digest('SHA-256', contents)));
+      if (actual !== digest) return fallback;
+    }
+    return { response, cache, revision: digest ? revision : null };
+  } catch {
+    return fallback;
+  }
 }
 
 async function renderPlayer(payload) {
@@ -74,13 +103,13 @@ async function checkRelease(keyPair, rawPublicKey) {
   retry.disabled = true;
   status.textContent = 'Проверяю активацию…';
   try {
-    const response = await retrieveRelease();
-    if (!response) {
+    const entry = await retrieveRelease();
+    if (!entry) {
       status.textContent = 'Для первого запуска понадобится интернет.';
       return;
     }
 
-    const release = await response.clone().json();
+    const release = await entry.response.clone().json();
     if (release.status === 'pending') {
       status.textContent = 'Плеер ждёт привязки к этой установке.';
       return;
@@ -96,11 +125,15 @@ async function checkRelease(keyPair, rawPublicKey) {
     if (![payload.html, payload.css, payload.script].every(value => typeof value === 'string' && value)) {
       throw new Error('Повреждён выпуск Wavebox.');
     }
-    let offlineReady = false;
+    let offlineReady = Boolean(entry.fromCache);
     try {
-      const cache = await caches.open(releaseCache);
-      await cache.put(releaseUrl, response);
-      offlineReady = true;
+      if (entry.cache && !entry.fromCache) {
+        // Drop the old comparison value before replacing the encrypted body.
+        await entry.cache.delete(revisionUrl);
+        await entry.cache.put(releaseUrl, entry.response);
+        offlineReady = true;
+        if (entry.revision) await entry.cache.put(revisionUrl, Response.json(entry.revision));
+      }
     } catch {
       // Playback can still start when offline storage is unavailable.
     }
