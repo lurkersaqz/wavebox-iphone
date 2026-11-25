@@ -3,32 +3,42 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#09090B">
+  <meta name="theme-color" content="#0A0A0C">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wavebox">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.hitmos.fm https://*.muzsky.net https://cdn.imusic.fm; connect-src 'self' https:; media-src https: blob:; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.hitmos.fm https://*.muzsky.net https://cdn.imusic.fm https://*.imusic.fm https://archive.org https://*.archive.org; connect-src 'self' https:; media-src https: blob:; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <title>Wavebox Free</title>
   <style id="setup-style">
-    *{box-sizing:border-box}body{margin:0;background:#09090B;color:#f4f4f6;font:16px system-ui,sans-serif}
-    main{max-width:33rem;margin:auto;padding:calc(36px + env(safe-area-inset-top)) 22px 32px}
-    header{display:flex;align-items:center;gap:14px;margin-bottom:24px}header img{border-radius:14px}
-    h1{margin:0;font-size:1.8rem;letter-spacing:-.04em}p{color:#b6c3b9;line-height:1.55}
-    section{background:#1b251e;border:1px solid #2e3b32;border-radius:19px;padding:18px}
-    h2{font-size:1.15rem;margin:0}section p:last-child{margin-bottom:0}
-    textarea,button{display:block;width:100%;font:inherit;margin-top:10px;border-radius:12px;padding:12px}
-    textarea{color:#f1f5f1;border:1px solid #506153;background:#101412;resize:vertical;overflow-wrap:anywhere}
-    button{border:0;background:#c5ff74;color:#12210d;font-weight:700;cursor:pointer}
-    button.secondary{color:#f1f5f1;background:#29312e}button:disabled{opacity:.55}
-    textarea:focus,button:focus-visible{outline:2px solid #c5ff74;outline-offset:2px}
+    *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    :root{color-scheme:dark;--bg:#0A0A0C;--glass:rgba(24,24,30,.78);--border:rgba(255,255,255,.12);--text:#F5F5F7;--muted:rgba(235,235,245,.68);--accent:#FA2D48;--accent-soft:rgba(250,45,72,.16)}
+    html,body{margin:0;min-height:100dvh;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;overscroll-behavior-y:none;-webkit-font-smoothing:antialiased}
+    body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 20% 10%,rgba(250,45,72,.24) 0%,transparent 56%),radial-gradient(circle at 84% 76%,rgba(74,92,168,.20) 0%,transparent 58%)}
+    main{position:relative;z-index:1;max-width:440px;min-height:100dvh;margin:0 auto;padding:calc(36px + env(safe-area-inset-top,0px)) 20px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;justify-content:center;gap:20px}
+    header{display:flex;align-items:center;gap:14px}
+    header img{border-radius:16px;border:1px solid rgba(255,255,255,.16);box-shadow:0 12px 28px rgba(0,0,0,.48)}
+    h1{margin:0;font-size:28px;font-weight:760;letter-spacing:-.03em;line-height:1.1}
+    section{background:var(--glass);border:1px solid var(--border);box-shadow:0 18px 46px rgba(0,0,0,.50),inset 0 1px 0 rgba(255,255,255,.16);backdrop-filter:blur(30px) saturate(190%);-webkit-backdrop-filter:blur(30px) saturate(190%);border-radius:24px;padding:20px}
+    h2{font-size:18px;font-weight:700;letter-spacing:-.02em;margin:0 0 10px}
+    p{margin:0;color:var(--muted);font-size:14.5px;line-height:1.5}
+    textarea,button{display:block;width:100%;font:inherit;margin-top:12px}
+    textarea{font-size:16px;padding:12px 14px;border-radius:14px;color:var(--text);border:1px solid rgba(255,255,255,.16);background:rgba(10,10,14,.72);resize:vertical;overflow-wrap:anywhere}
+    button{min-height:48px;padding:0 16px;border:0;border-radius:9999px;background:var(--accent);color:#fff;font-size:15.5px;font-weight:650;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 8px 24px rgba(250,45,72,.34);transition:transform 150ms ease,opacity 150ms ease}
+    button:active:not(:disabled){transform:scale(.97)}
+    button.secondary{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:var(--text);box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+    button:disabled{opacity:.5;cursor:not-allowed}
+    textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+    #status{margin-top:14px;min-height:1.4em;font-size:13.5px;text-align:center}
     [hidden]{display:none!important}
   </style>
-  <script type="module" src="./setup.js?v=3"></script>
+  <script type="module" src="./setup.js?v=4"></script>
 </head>
 <body>
   <main>
-    <header><img src="./icon-192.png" alt="" width="48" height="48"><h1>Wavebox Free</h1></header>
+    <header><img src="./icon-192.png" alt="" width="56" height="56"><h1>Wavebox Free</h1></header>
     <section id="installation">
       <h2>Установка на iPhone</h2>
       <p>Открой эту страницу в Safari. Нажми «Поделиться» → «На экран „Домой“», затем запусти Wavebox с иконки.</p>
